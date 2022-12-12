@@ -1,10 +1,12 @@
 import java.util.Scanner
 
+const val archiveOrNoteChooseNote = "выбрать заметку"
+
 open class Menu {
     private val scanner = Scanner(System.`in`)
 
     // Общий метод для печати меню списка архивов и заметок
-    fun printMenu(archiveOrNote: String, list: MutableList<String>) {
+    private fun printMenu(archiveOrNote: String, list: MutableSet<String>) {
         println("\nМеню\n0. Создать $archiveOrNote")
         var n = 1
         for (element in list) {
@@ -20,11 +22,11 @@ open class Menu {
     }
 
     // Общий метод для выбора пункта в списке
-    fun chooseNumber(archiveOrNote: String, list: MutableList<String>, chosenNote: String): Int {
+    fun chooseNumber(archiveOrNote: String, list: MutableSet<String>, chosenNote: String): Int {
         while (true) {
             if (scanner.hasNextInt()) { // Проверка типа введенного значения
-                var chosenNumber = scanner.nextInt()
-                var buffer = scanner.nextLine()
+                val chosenNumber = scanner.nextInt()
+                var buffer = scanner.nextLine() // Это нужно чтобы считать строку до конца после nextInt()
                 if (chosenNumber >= 0 && chosenNumber <= list.size + 1) { // Проверка значения введенного числа
                     return chosenNumber
                 } else {
@@ -36,9 +38,9 @@ open class Menu {
                 }
             } else {
                 println("\nОшибка: Для выбора пункта введите число, попробуйте еще раз.")
-                var buffer = scanner.nextLine()
+                var buffer = scanner.nextLine() // Это нужно чтобы считать неверный ввод, чтобы nextInt() корректно читал с новой строки
                 when(archiveOrNote) {
-                    "выбрать заметку" -> printMenuNote(chosenNote)
+                    archiveOrNoteChooseNote -> printMenuNote(chosenNote)
                     else -> printMenu(archiveOrNote, list)
                 }
             }
@@ -46,7 +48,7 @@ open class Menu {
     }
 
     // Общий метод для проверки дубликатов в списках архивов и заметок
-    fun checkDuplicate(archiveOrNote: String, list: MutableList<String>, chosenNumber: Int) : String {
+    private fun checkDuplicate(archiveOrNote: String, list: MutableSet<String>, chosenNumber: Int) : String {
         var newElement = ""
         if (chosenNumber == 0) {
             while (true) {
@@ -61,5 +63,20 @@ open class Menu {
         }
         return newElement
     }
+
+    // Объединение всех действий с меню список архивов и меню список заметок
+    fun actionsMenuArchivesNotes(
+        menu: Menu,
+        archiveOrNote: String,
+        list: MutableSet<String>,
+        chosenNote: String
+    ) : Pair<String, Int> {
+        menu.printMenu(archiveOrNote, list) // Вывод меню списка
+        val chosenNumber = menu.chooseNumber(archiveOrNote, list, chosenNote) // Выбор пункта меню
+        val newArchive = menu.checkDuplicate(archiveOrNote, list, chosenNumber) // Проверка на дубликаты
+        return Pair(newArchive, chosenNumber)
+    }
 }
+
+
 
